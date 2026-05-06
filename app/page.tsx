@@ -714,10 +714,11 @@ export default function HomePage() {
                 </div>
                 <div className="terminal-panel rounded-2xl p-4">
                   <p className="font-mono-ui text-[0.72rem] uppercase tracking-[0.24em] text-[var(--text-mono)]">
-                    Zero Budget
+                    ZERO LATENCY
                   </p>
                   <p className="mt-2 text-base text-[var(--text-primary)]">
-                    Built for hackathon speed on free-tier infrastructure
+                    Real-time analysis powered by free-tier infrastructure with
+                    production-grade reliability
                   </p>
                 </div>
               </div>

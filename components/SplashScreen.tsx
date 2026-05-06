@@ -29,9 +29,10 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
   const arc2Radius = 58;
   const arc3Radius = 80;
 
-  const arc1Length = Math.PI * arc1Radius; // half circle
-  const arc2Length = Math.PI * arc2Radius;
-  const arc3Length = Math.PI * arc3Radius;
+  // Half-circumference lengths (π * r)
+  const arc1Length = Math.PI * arc1Radius; // ≈ 113
+  const arc2Length = Math.PI * arc2Radius; // ≈ 182
+  const arc3Length = Math.PI * arc3Radius; // ≈ 251
 
   return (
     <div
@@ -68,6 +69,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           className="mb-8"
           style={{
             filter: "drop-shadow(0 0 20px rgba(0, 255, 135, 0.2))",
+            willChange: "transform",
           }}
         >
           {/* Center dot */}
@@ -83,31 +85,32 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           />
 
           {/* Arc 1 - inner */}
+          {/* Arc 1 (top semicircle) */}
           <path
-            d={`M 100 64 A 36 36 0 0 1 136 136`}
+            d={`M ${100 - arc1Radius} 100 A ${arc1Radius} ${arc1Radius} 0 0 1 ${100 + arc1Radius} 100`}
             stroke="#00FF87"
             strokeWidth="3"
             fill="none"
             strokeLinecap="round"
             style={{
               opacity: 1,
-              strokeDasharray: `${arc1Length}`,
-              strokeDashoffset: `${arc1Length}`,
-              animation: `arcDraw 0.8s ease-out forwards`,
+              strokeDasharray: `${arc1Length} ${arc1Length}`,
+              strokeDashoffset: arc1Length,
+              animation: `arcDraw 0.6s cubic-bezier(0.4,0,0.2,1) forwards`,
               animationDelay: "0.2s",
             }}
           />
           <path
-            d={`M 100 64 A 36 36 0 0 1 136 136`}
+            d={`M ${100 - arc1Radius} 100 A ${arc1Radius} ${arc1Radius} 0 0 1 ${100 + arc1Radius} 100`}
             stroke="#00FF87"
             strokeWidth="3"
             fill="none"
             strokeLinecap="round"
             style={{
               opacity: 0.7,
-              strokeDasharray: `${arc1Length}`,
-              strokeDashoffset: `${arc1Length}`,
-              animation: `arcDraw 0.8s ease-out forwards`,
+              strokeDasharray: `${arc1Length} ${arc1Length}`,
+              strokeDashoffset: arc1Length,
+              animation: `arcDraw 0.6s cubic-bezier(0.4,0,0.2,1) forwards`,
               animationDelay: "0.2s",
               filter: "blur(0.5px)",
             }}
@@ -115,31 +118,32 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           />
 
           {/* Arc 2 - mid */}
+          {/* Arc 2 (mid semicircle) */}
           <path
-            d={`M 100 42 A 58 58 0 0 1 158 158`}
+            d={`M ${100 - arc2Radius} 100 A ${arc2Radius} ${arc2Radius} 0 0 1 ${100 + arc2Radius} 100`}
             stroke="#00FF87"
             strokeWidth="2.5"
             fill="none"
             strokeLinecap="round"
             style={{
               opacity: 0.55,
-              strokeDasharray: `${arc2Length}`,
-              strokeDashoffset: `${arc2Length}`,
-              animation: `arcDraw 0.8s ease-out forwards`,
+              strokeDasharray: `${arc2Length} ${arc2Length}`,
+              strokeDashoffset: arc2Length,
+              animation: `arcDraw 0.6s cubic-bezier(0.4,0,0.2,1) forwards`,
               animationDelay: "0.35s",
             }}
           />
           <path
-            d={`M 100 42 A 58 58 0 0 1 158 158`}
+            d={`M ${100 - arc2Radius} 100 A ${arc2Radius} ${arc2Radius} 0 0 1 ${100 + arc2Radius} 100`}
             stroke="#00FF87"
             strokeWidth="2.5"
             fill="none"
             strokeLinecap="round"
             style={{
               opacity: 0.35,
-              strokeDasharray: `${arc2Length}`,
-              strokeDashoffset: `${arc2Length}`,
-              animation: `arcDraw 0.8s ease-out forwards`,
+              strokeDasharray: `${arc2Length} ${arc2Length}`,
+              strokeDashoffset: arc2Length,
+              animation: `arcDraw 0.6s cubic-bezier(0.4,0,0.2,1) forwards`,
               animationDelay: "0.35s",
               filter: "blur(0.5px)",
             }}
@@ -147,31 +151,32 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           />
 
           {/* Arc 3 - outer */}
+          {/* Arc 3 (outer semicircle) */}
           <path
-            d={`M 100 20 A 80 80 0 0 1 180 180`}
+            d={`M ${100 - arc3Radius} 100 A ${arc3Radius} ${arc3Radius} 0 0 1 ${100 + arc3Radius} 100`}
             stroke="#00FF87"
             strokeWidth="2"
             fill="none"
             strokeLinecap="round"
             style={{
               opacity: 0.3,
-              strokeDasharray: `${arc3Length}`,
-              strokeDashoffset: `${arc3Length}`,
-              animation: `arcDraw 0.8s ease-out forwards`,
+              strokeDasharray: `${arc3Length} ${arc3Length}`,
+              strokeDashoffset: arc3Length,
+              animation: `arcDraw 0.6s cubic-bezier(0.4,0,0.2,1) forwards`,
               animationDelay: "0.5s",
             }}
           />
           <path
-            d={`M 100 20 A 80 80 0 0 1 180 180`}
+            d={`M ${100 - arc3Radius} 100 A ${arc3Radius} ${arc3Radius} 0 0 1 ${100 + arc3Radius} 100`}
             stroke="#00FF87"
             strokeWidth="2"
             fill="none"
             strokeLinecap="round"
             style={{
               opacity: 0.15,
-              strokeDasharray: `${arc3Length}`,
-              strokeDashoffset: `${arc3Length}`,
-              animation: `arcDraw 0.8s ease-out forwards`,
+              strokeDasharray: `${arc3Length} ${arc3Length}`,
+              strokeDashoffset: arc3Length,
+              animation: `arcDraw 0.6s cubic-bezier(0.4,0,0.2,1) forwards`,
               animationDelay: "0.5s",
               filter: "blur(0.5px)",
             }}

@@ -143,3 +143,10 @@ Next.js 14 has a peer dependency conflict with ESLint 9. Pinned to `^8.57.0` in 
 - **Product Doc:** `/docs/PRODUCT.md`
 - **Technical Doc:** `/docs/TECHNICAL.md`
 - **Deployment:** Deployed on Render as a single Node.js web service instead of Firebase+Render split — simpler architecture, Next.js API routes need a Node.js server
+
+---
+
+## Change Log
+
+- 2026-05-06: Fixed splash arc animation with correct stroke-dasharray lengths and smoother cubic-bezier timing.
+- 2026-05-06: Removed hackathon reference from landing page feature cards; replaced with "ZERO LATENCY" messaging.
