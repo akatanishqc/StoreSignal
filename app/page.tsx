@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import SplashScreen from "@/components/SplashScreen";
 import type { StoreData } from "@/lib/shopify";
 import type { StoreAuditReport, ProductAudit, PolicyAudit } from "@/lib/gemini";
 
@@ -254,6 +255,7 @@ function ProductCardComponent({
 }
 
 export default function HomePage() {
+  const [showSplash, setShowSplash] = useState(true);
   const [domain, setDomain] = useState("");
   const [token, setToken] = useState("");
   const [showToken, setShowToken] = useState(false);
@@ -654,131 +656,108 @@ export default function HomePage() {
   const totalVariants = result?.totals.variants ?? 0;
 
   return (
-    <main className="relative min-h-screen overflow-hidden px-5 py-6 text-[var(--text-primary)] sm:px-8 lg:px-10">
-      <div className="scan-grid pointer-events-none absolute inset-0 opacity-40" />
-      <div className="scan-sweep pointer-events-none absolute inset-0 opacity-50" />
-      <div className="pointer-events-none absolute left-1/2 top-0 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-[rgba(0,255,135,0.06)] blur-3xl" />
+    <>
+      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+      <main className="relative min-h-screen overflow-hidden px-5 py-6 text-[var(--text-primary)] sm:px-8 lg:px-10">
+        <div className="scan-grid pointer-events-none absolute inset-0 opacity-40" />
+        <div className="scan-sweep pointer-events-none absolute inset-0 opacity-50" />
+        <div className="pointer-events-none absolute left-1/2 top-0 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-[rgba(0,255,135,0.06)] blur-3xl" />
 
-      <div className="relative mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-7xl flex-col">
-        <header className="flex items-center justify-between border-b border-[var(--border)] pb-5 pt-1">
-          <div className="flex items-center gap-3">
-            <span className="pulse-dot h-2.5 w-2.5 rounded-full bg-[var(--accent-green)] shadow-[0_0_16px_rgba(0,255,135,0.9)]" />
-            <span className="font-display text-lg font-semibold tracking-[0.08em] sm:text-xl">
-              StoreSignal
-            </span>
-          </div>
-          <p className="text-right font-mono-ui text-[0.7rem] uppercase tracking-[0.28em] text-[var(--text-secondary)] sm:text-xs">
-            by{" "}
-            <a
-              href="https://TanishqSolves.me"
-              target="_blank"
-              rel="noreferrer noopener"
-              className="transition-colors duration-200 ease-out hover:text-[var(--text-primary)]"
-            >
-              tanishqsolves.me
-            </a>
-          </p>
-        </header>
-
-        <section className="grid flex-1 items-center gap-10 py-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-14 lg:py-12">
-          <div className="relative z-10 max-w-3xl animate-fade-up">
-            <h1 className="mt-6 max-w-3xl font-display text-5xl font-extrabold leading-[0.96] tracking-[-0.04em] text-[var(--text-primary)] sm:text-6xl lg:text-7xl">
-              How Does AI See Your Store?
-            </h1>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--text-secondary)] sm:text-lg">
-              StoreSignal analyzes your Shopify store the way an AI shopping
-              agent does — surfacing gaps, misrepresentations, and missed
-              opportunities.
-            </p>
-
-            <div className="mt-10 grid max-w-2xl gap-4 text-sm text-[var(--text-secondary)] sm:grid-cols-3">
-              <div className="terminal-panel rounded-2xl p-4">
-                <p className="font-mono-ui text-[0.72rem] uppercase tracking-[0.24em] text-[var(--text-mono)]">
-                  Diagnostic Readiness
-                </p>
-                <p className="mt-2 text-base text-[var(--text-primary)]">
-                  Shopify metadata, policies, and product signals
-                </p>
-              </div>
-              <div className="terminal-panel rounded-2xl p-4">
-                <p className="font-mono-ui text-[0.72rem] uppercase tracking-[0.24em] text-[var(--text-mono)]">
-                  Signal Quality
-                </p>
-                <p className="mt-2 text-base text-[var(--text-primary)]">
-                  Spot gaps before an AI assistant misreads the store
-                </p>
-              </div>
-              <div className="terminal-panel rounded-2xl p-4">
-                <p className="font-mono-ui text-[0.72rem] uppercase tracking-[0.24em] text-[var(--text-mono)]">
-                  Zero Budget
-                </p>
-                <p className="mt-2 text-base text-[var(--text-primary)]">
-                  Built for hackathon speed on free-tier infrastructure
-                </p>
-              </div>
+        <div className="relative mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-7xl flex-col">
+          <header className="flex items-center justify-between border-b border-[var(--border)] pb-5 pt-1">
+            <div className="flex items-center gap-3">
+              <span className="pulse-dot h-2.5 w-2.5 rounded-full bg-[var(--accent-green)] shadow-[0_0_16px_rgba(0,255,135,0.9)]" />
+              <span className="font-display text-lg font-semibold tracking-[0.08em] sm:text-xl">
+                StoreSignal
+              </span>
             </div>
-          </div>
+            <p className="text-right font-mono-ui text-[0.7rem] uppercase tracking-[0.28em] text-[var(--text-secondary)] sm:text-xs">
+              by{" "}
+              <a
+                href="https://TanishqSolves.me"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="transition-colors duration-200 ease-out hover:text-[var(--text-primary)]"
+              >
+                tanishqsolves.me
+              </a>
+            </p>
+          </header>
 
-          <div
-            className="relative z-10 animate-fade-up lg:pl-6"
-            style={{ animationDelay: "90ms" }}
-          >
-            <div className="terminal-panel rounded-[1.75rem] border-[color:var(--accent-green-border)] p-5 shadow-glow sm:p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="font-display text-2xl font-semibold tracking-[-0.03em] text-[var(--text-primary)] sm:text-[2rem]">
-                    Connect Your Store
-                  </h2>
-                  <p className="mt-2 max-w-md text-sm leading-6 text-[var(--text-secondary)]">
-                    Pull live store data through the Shopify Admin API, then
-                    hand it off to your AI pipeline.
+          <section className="grid flex-1 items-center gap-10 py-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-14 lg:py-12">
+            <div className="relative z-10 max-w-3xl animate-fade-up">
+              <h1 className="mt-6 max-w-3xl font-display text-5xl font-extrabold leading-[0.96] tracking-[-0.04em] text-[var(--text-primary)] sm:text-6xl lg:text-7xl">
+                How Does AI See Your Store?
+              </h1>
+              <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--text-secondary)] sm:text-lg">
+                StoreSignal analyzes your Shopify store the way an AI shopping
+                agent does — surfacing gaps, misrepresentations, and missed
+                opportunities.
+              </p>
+
+              <div className="mt-10 grid max-w-2xl gap-4 text-sm text-[var(--text-secondary)] sm:grid-cols-3">
+                <div className="terminal-panel rounded-2xl p-4">
+                  <p className="font-mono-ui text-[0.72rem] uppercase tracking-[0.24em] text-[var(--text-mono)]">
+                    Diagnostic Readiness
+                  </p>
+                  <p className="mt-2 text-base text-[var(--text-primary)]">
+                    Shopify metadata, policies, and product signals
                   </p>
                 </div>
-                <span className="rounded-full border border-[var(--accent-green-border)] bg-[var(--accent-green-dim)] px-3 py-1 font-mono-ui text-[0.68rem] tracking-[0.22em] text-[var(--text-mono)]">
-                  LIVE
-                </span>
+                <div className="terminal-panel rounded-2xl p-4">
+                  <p className="font-mono-ui text-[0.72rem] uppercase tracking-[0.24em] text-[var(--text-mono)]">
+                    Signal Quality
+                  </p>
+                  <p className="mt-2 text-base text-[var(--text-primary)]">
+                    Spot gaps before an AI assistant misreads the store
+                  </p>
+                </div>
+                <div className="terminal-panel rounded-2xl p-4">
+                  <p className="font-mono-ui text-[0.72rem] uppercase tracking-[0.24em] text-[var(--text-mono)]">
+                    Zero Budget
+                  </p>
+                  <p className="mt-2 text-base text-[var(--text-primary)]">
+                    Built for hackathon speed on free-tier infrastructure
+                  </p>
+                </div>
               </div>
+            </div>
 
-              <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-                <div>
-                  <label
-                    htmlFor="domain"
-                    className="mb-2 block font-mono-ui text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]"
-                  >
-                    Shop Domain
-                  </label>
-                  <input
-                    id="domain"
-                    className="terminal-input"
-                    placeholder="your-store.myshopify.com"
-                    value={domain}
-                    onChange={(event) => {
-                      setDomain(event.target.value);
-                      if (state === "error") {
-                        resetStatus();
-                      }
-                    }}
-                    autoComplete="off"
-                    spellCheck={false}
-                  />
+            <div
+              className="relative z-10 animate-fade-up lg:pl-6"
+              style={{ animationDelay: "90ms" }}
+            >
+              <div className="terminal-panel rounded-[1.75rem] border-[color:var(--accent-green-border)] p-5 shadow-glow sm:p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h2 className="font-display text-2xl font-semibold tracking-[-0.03em] text-[var(--text-primary)] sm:text-[2rem]">
+                      Connect Your Store
+                    </h2>
+                    <p className="mt-2 max-w-md text-sm leading-6 text-[var(--text-secondary)]">
+                      Pull live store data through the Shopify Admin API, then
+                      hand it off to your AI pipeline.
+                    </p>
+                  </div>
+                  <span className="rounded-full border border-[var(--accent-green-border)] bg-[var(--accent-green-dim)] px-3 py-1 font-mono-ui text-[0.68rem] tracking-[0.22em] text-[var(--text-mono)]">
+                    LIVE
+                  </span>
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="token"
-                    className="mb-2 block font-mono-ui text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]"
-                  >
-                    Admin API Token
-                  </label>
-                  <div className="relative">
+                <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+                  <div>
+                    <label
+                      htmlFor="domain"
+                      className="mb-2 block font-mono-ui text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]"
+                    >
+                      Shop Domain
+                    </label>
                     <input
-                      id="token"
-                      className="terminal-input pr-20 font-mono-ui text-[0.95rem]"
-                      placeholder="shpat_xxxxx..."
-                      type={showToken ? "text" : "password"}
-                      value={token}
+                      id="domain"
+                      className="terminal-input"
+                      placeholder="your-store.myshopify.com"
+                      value={domain}
                       onChange={(event) => {
-                        setToken(event.target.value);
+                        setDomain(event.target.value);
                         if (state === "error") {
                           resetStatus();
                         }
@@ -786,215 +765,241 @@ export default function HomePage() {
                       autoComplete="off"
                       spellCheck={false}
                     />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowToken((currentValue) => !currentValue)
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-1 font-mono-ui text-[0.7rem] uppercase tracking-[0.18em] text-[var(--text-secondary)] transition-colors duration-200 ease-out hover:text-[var(--text-primary)]"
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="token"
+                      className="mb-2 block font-mono-ui text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]"
                     >
-                      {showToken ? "Hide" : "Show"}
-                    </button>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={state === "loading"}
-                  className="terminal-button flex h-14 w-full items-center justify-center gap-3 font-display text-base font-bold tracking-[0.04em]"
-                >
-                  {state === "loading" ? (
-                    <>
-                      <span className="spinner border-[rgba(10,10,15,0.25)] border-t-[var(--bg-primary)]" />
-                      <span>Scanning Store...</span>
-                    </>
-                  ) : (
-                    "Run Diagnostic"
-                  )}
-                </button>
-              </form>
-
-              {state === "success" && result ? (
-                <div
-                  className="mt-5 animate-fade-up rounded-[1.35rem] border border-[rgba(0,255,135,0.35)] bg-[rgba(0,255,135,0.06)] p-5"
-                  style={{ animationDelay: "70ms" }}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="font-display text-xl font-semibold text-[var(--text-primary)]">
-                      ✓ Connected — {result.shop.name}
-                    </p>
-                    <p className="font-mono-ui text-xs uppercase tracking-[0.18em] text-[var(--text-mono)]">
-                      Store snapshot ready
-                    </p>
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-3">
-                    <span className="mono-chip rounded-full px-3 py-1.5 font-mono-ui text-sm">
-                      {totalProducts} Products
-                    </span>
-                    <span className="mono-chip rounded-full px-3 py-1.5 font-mono-ui text-sm">
-                      {totalPages} Pages
-                    </span>
-                    <span className="mono-chip rounded-full px-3 py-1.5 font-mono-ui text-sm">
-                      {totalVariants} Variants
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!result) return;
-                      setAnalyzing(true);
-                      setAnalysisMessage(
-                        `Analyzing ${result.totals.products} products...`,
-                      );
-
-                      try {
-                        const resp = await fetch("/api/analyze-store", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ domain, token }),
-                        });
-
-                        const payload = await resp.json();
-                        if (!resp.ok || !payload.success) {
-                          throw new Error(payload.error ?? "Analysis failed");
+                      Admin API Token
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="token"
+                        className="terminal-input pr-20 font-mono-ui text-[0.95rem]"
+                        placeholder="shpat_xxxxx..."
+                        type={showToken ? "text" : "password"}
+                        value={token}
+                        onChange={(event) => {
+                          setToken(event.target.value);
+                          if (state === "error") {
+                            resetStatus();
+                          }
+                        }}
+                        autoComplete="off"
+                        spellCheck={false}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setShowToken((currentValue) => !currentValue)
                         }
+                        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-1 font-mono-ui text-[0.7rem] uppercase tracking-[0.18em] text-[var(--text-secondary)] transition-colors duration-200 ease-out hover:text-[var(--text-primary)]"
+                      >
+                        {showToken ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                  </div>
 
-                        setAuditReport(payload.report);
-                        console.log("Store analysis report", payload.report);
-                        console.log(
-                          "RAW dimensions:",
-                          JSON.stringify(
-                            payload.report.productAudits[0]?.dimensions,
-                          ),
-                        );
-                        console.log(
-                          "RAW totalScore:",
-                          payload.report.productAudits[0]?.totalScore,
-                        );
-                        const validCount =
-                          payload.report.productAudits?.filter(
-                            (p: ProductAudit) => p.totalScore > 0,
-                          ).length ?? 0;
-                        setAnalysisMessage(
-                          `Analysis complete — ${validCount} products scored`,
-                        );
-                        setTimeout(() => setAnalysisMessage(""), 6000);
-                      } catch (err) {
-                        setAnalysisMessage(
-                          err instanceof Error
-                            ? err.message
-                            : "Analysis failed",
-                        );
-                        setTimeout(() => setAnalysisMessage(""), 6000);
-                      } finally {
-                        setAnalyzing(false);
-                      }
-                    }}
-                    disabled={analyzing || !result}
-                    className="mt-4 flex h-12 w-full items-center justify-center rounded-xl border border-[rgba(0,255,135,0.2)] bg-[rgba(0,255,135,0.1)] font-display text-sm font-semibold text-[var(--text-primary)]"
+                  <button
+                    type="submit"
+                    disabled={state === "loading"}
+                    className="terminal-button flex h-14 w-full items-center justify-center gap-3 font-display text-base font-bold tracking-[0.04em]"
                   >
-                    {analyzing ? (
-                      <span className="font-mono-ui animate-pulse">
-                        {analysisMessage}
-                      </span>
+                    {state === "loading" ? (
+                      <>
+                        <span className="spinner border-[rgba(10,10,15,0.25)] border-t-[var(--bg-primary)]" />
+                        <span>Scanning Store...</span>
+                      </>
                     ) : (
-                      "Run AI Analysis →"
+                      "Run Diagnostic"
                     )}
                   </button>
-                </div>
-              ) : null}
+                </form>
 
-              {state === "error" ? (
-                <div
-                  className="mt-5 animate-fade-up rounded-[1.35rem] border border-[rgba(255,68,68,0.4)] bg-[rgba(255,68,68,0.08)] p-5"
-                  style={{ animationDelay: "70ms" }}
-                >
-                  <p className="font-display text-xl font-semibold text-[#ff9a9a]">
-                    Connection failed
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-[rgba(255,255,255,0.82)]">
-                    {error}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={resetStatus}
-                    className="mt-4 inline-flex h-11 items-center justify-center rounded-xl border border-[rgba(255,68,68,0.25)] bg-[rgba(255,68,68,0.12)] px-5 font-display text-sm font-semibold text-[var(--text-primary)] transition-transform duration-200 ease-out hover:scale-[1.02]"
+                {state === "success" && result ? (
+                  <div
+                    className="mt-5 animate-fade-up rounded-[1.35rem] border border-[rgba(0,255,135,0.35)] bg-[rgba(0,255,135,0.06)] p-5"
+                    style={{ animationDelay: "70ms" }}
                   >
-                    Try Again
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </section>
-
-        <section className="relative z-10 pb-14 lg:pb-20">
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <div>
-              <p className="font-mono-ui text-xs uppercase tracking-[0.24em] text-[var(--text-secondary)]">
-                How It Works
-              </p>
-              <h3 className="mt-2 font-display text-3xl font-semibold tracking-[-0.03em] text-[var(--text-primary)]">
-                Three steps. One diagnostic pass.
-              </h3>
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="step-connector absolute left-[10%] right-[10%] top-7 hidden h-px md:block" />
-            <div className="grid gap-4 md:grid-cols-3">
-              {[
-                {
-                  title: "Connect",
-                  copy: "Enter your shop domain and Admin API token to pull live store data.",
-                  icon: <PlugIcon />,
-                  step: "01",
-                },
-                {
-                  title: "Analyze",
-                  copy: "Scan products, pages, and policies the way an AI buyer would interpret them.",
-                  icon: <ScanIcon />,
-                  step: "02",
-                },
-                {
-                  title: "Optimize",
-                  copy: "Surface gaps and misrepresentation risks before your next AI workflow touches the store.",
-                  icon: <ChartIcon />,
-                  step: "03",
-                },
-              ].map((item) => (
-                <article
-                  key={item.title}
-                  className="terminal-panel animate-fade-up rounded-[1.4rem] p-5"
-                  style={{
-                    animationDelay:
-                      item.step === "01"
-                        ? "0ms"
-                        : item.step === "02"
-                          ? "70ms"
-                          : "120ms",
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--accent-green-border)] bg-[var(--accent-green-dim)] text-[var(--text-mono)]">
-                      {item.icon}
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="font-display text-xl font-semibold text-[var(--text-primary)]">
+                        ✓ Connected — {result.shop.name}
+                      </p>
+                      <p className="font-mono-ui text-xs uppercase tracking-[0.18em] text-[var(--text-mono)]">
+                        Store snapshot ready
+                      </p>
                     </div>
-                    <span className="font-mono-ui text-sm tracking-[0.24em] text-[var(--text-mono)]">
-                      {item.step}
-                    </span>
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      <span className="mono-chip rounded-full px-3 py-1.5 font-mono-ui text-sm">
+                        {totalProducts} Products
+                      </span>
+                      <span className="mono-chip rounded-full px-3 py-1.5 font-mono-ui text-sm">
+                        {totalPages} Pages
+                      </span>
+                      <span className="mono-chip rounded-full px-3 py-1.5 font-mono-ui text-sm">
+                        {totalVariants} Variants
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!result) return;
+                        setAnalyzing(true);
+                        setAnalysisMessage(
+                          `Analyzing ${result.totals.products} products...`,
+                        );
+
+                        try {
+                          const resp = await fetch("/api/analyze-store", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ domain, token }),
+                          });
+
+                          const payload = await resp.json();
+                          if (!resp.ok || !payload.success) {
+                            throw new Error(payload.error ?? "Analysis failed");
+                          }
+
+                          setAuditReport(payload.report);
+                          console.log("Store analysis report", payload.report);
+                          console.log(
+                            "RAW dimensions:",
+                            JSON.stringify(
+                              payload.report.productAudits[0]?.dimensions,
+                            ),
+                          );
+                          console.log(
+                            "RAW totalScore:",
+                            payload.report.productAudits[0]?.totalScore,
+                          );
+                          const validCount =
+                            payload.report.productAudits?.filter(
+                              (p: ProductAudit) => p.totalScore > 0,
+                            ).length ?? 0;
+                          setAnalysisMessage(
+                            `Analysis complete — ${validCount} products scored`,
+                          );
+                          setTimeout(() => setAnalysisMessage(""), 6000);
+                        } catch (err) {
+                          setAnalysisMessage(
+                            err instanceof Error
+                              ? err.message
+                              : "Analysis failed",
+                          );
+                          setTimeout(() => setAnalysisMessage(""), 6000);
+                        } finally {
+                          setAnalyzing(false);
+                        }
+                      }}
+                      disabled={analyzing || !result}
+                      className="mt-4 flex h-12 w-full items-center justify-center rounded-xl border border-[rgba(0,255,135,0.2)] bg-[rgba(0,255,135,0.1)] font-display text-sm font-semibold text-[var(--text-primary)]"
+                    >
+                      {analyzing ? (
+                        <span className="font-mono-ui animate-pulse">
+                          {analysisMessage}
+                        </span>
+                      ) : (
+                        "Run AI Analysis →"
+                      )}
+                    </button>
                   </div>
-                  <h4 className="mt-4 font-display text-xl font-semibold text-[var(--text-primary)]">
-                    {item.title}
-                  </h4>
-                  <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">
-                    {item.copy}
-                  </p>
-                </article>
-              ))}
+                ) : null}
+
+                {state === "error" ? (
+                  <div
+                    className="mt-5 animate-fade-up rounded-[1.35rem] border border-[rgba(255,68,68,0.4)] bg-[rgba(255,68,68,0.08)] p-5"
+                    style={{ animationDelay: "70ms" }}
+                  >
+                    <p className="font-display text-xl font-semibold text-[#ff9a9a]">
+                      Connection failed
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[rgba(255,255,255,0.82)]">
+                      {error}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={resetStatus}
+                      className="mt-4 inline-flex h-11 items-center justify-center rounded-xl border border-[rgba(255,68,68,0.25)] bg-[rgba(255,68,68,0.12)] px-5 font-display text-sm font-semibold text-[var(--text-primary)] transition-transform duration-200 ease-out hover:scale-[1.02]"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             </div>
-          </div>
-        </section>
-      </div>
-    </main>
+          </section>
+
+          <section className="relative z-10 pb-14 lg:pb-20">
+            <div className="mb-5 flex items-center justify-between gap-4">
+              <div>
+                <p className="font-mono-ui text-xs uppercase tracking-[0.24em] text-[var(--text-secondary)]">
+                  How It Works
+                </p>
+                <h3 className="mt-2 font-display text-3xl font-semibold tracking-[-0.03em] text-[var(--text-primary)]">
+                  Three steps. One diagnostic pass.
+                </h3>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="step-connector absolute left-[10%] right-[10%] top-7 hidden h-px md:block" />
+              <div className="grid gap-4 md:grid-cols-3">
+                {[
+                  {
+                    title: "Connect",
+                    copy: "Enter your shop domain and Admin API token to pull live store data.",
+                    icon: <PlugIcon />,
+                    step: "01",
+                  },
+                  {
+                    title: "Analyze",
+                    copy: "Scan products, pages, and policies the way an AI buyer would interpret them.",
+                    icon: <ScanIcon />,
+                    step: "02",
+                  },
+                  {
+                    title: "Optimize",
+                    copy: "Surface gaps and misrepresentation risks before your next AI workflow touches the store.",
+                    icon: <ChartIcon />,
+                    step: "03",
+                  },
+                ].map((item) => (
+                  <article
+                    key={item.title}
+                    className="terminal-panel animate-fade-up rounded-[1.4rem] p-5"
+                    style={{
+                      animationDelay:
+                        item.step === "01"
+                          ? "0ms"
+                          : item.step === "02"
+                            ? "70ms"
+                            : "120ms",
+                    }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--accent-green-border)] bg-[var(--accent-green-dim)] text-[var(--text-mono)]">
+                        {item.icon}
+                      </div>
+                      <span className="font-mono-ui text-sm tracking-[0.24em] text-[var(--text-mono)]">
+                        {item.step}
+                      </span>
+                    </div>
+                    <h4 className="mt-4 font-display text-xl font-semibold text-[var(--text-primary)]">
+                      {item.title}
+                    </h4>
+                    <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">
+                      {item.copy}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </>
   );
 }

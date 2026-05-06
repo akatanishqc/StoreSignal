@@ -97,6 +97,25 @@ Familiar stack (used on prior projects), good for full-stack in one repo, straig
 
 Next.js 14 has a peer dependency conflict with ESLint 9. Pinned to `^8.57.0` in package.json to resolve and stabilize the build.
 
+### Splash Screen with Sequential Arc Animation
+
+**Decision:** Add a 2.4-second splash screen on app load with sequential signal arc animations
+
+**Reasoning:**
+
+- Creates a professional first impression and signals "AI-native tool"
+- Uses the app's existing design tokens (--accent-green, Syne, JetBrains Mono) for visual consistency
+- Sequential animations (dot → Arc 1 → Arc 2 → Arc 3 → wordmark → tagline) create rhythm and engagement
+- CSS-only animations (no library dependencies) keep bundle size small
+
+**Implementation:**
+
+- SplashScreen.tsx component uses SVG concentric arcs with stroke-dasharray animation
+- Loading bar animates full-width over 1.8s while arcs appear
+- Fades out at 2000ms, unmounts at 2400ms
+- All timing via setTimeout; state controls fade transition
+- onComplete callback removes splash from DOM
+
 ---
 
 ## What Worked Well
