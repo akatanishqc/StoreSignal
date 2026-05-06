@@ -123,3 +123,4 @@ Next.js 14 has a peer dependency conflict with ESLint 9. Pinned to `^8.57.0` in 
 - **Live Demo:** [Add link]
 - **Product Doc:** `/docs/PRODUCT.md`
 - **Technical Doc:** `/docs/TECHNICAL.md`
+- **Deployment:** Deployed on Render as a single Node.js web service instead of Firebase+Render split — simpler architecture, Next.js API routes need a Node.js server
