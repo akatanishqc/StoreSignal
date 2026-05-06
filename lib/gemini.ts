@@ -300,16 +300,16 @@ Score each dimension from 0 to 25 (maximum 25 each, total maximum 100). Do not e
 Return only valid JSON.
 
 REFUND POLICY:
-${truncate(refundText)}
+${refundText}
 
 SHIPPING POLICY:
-${truncate(shippingText)}
+${shippingText}
 
 PRIVACY POLICY:
-${truncate(privacyText)}
+${privacyText}
 
 TERMS OF SERVICE:
-${truncate(termsText)}
+${termsText}
 `;
 
     try {
