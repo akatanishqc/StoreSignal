@@ -154,3 +154,5 @@ Next.js 14 has a peer dependency conflict with ESLint 9. Pinned to `^8.57.0` in 
 - 2026-05-06: Fixed policy text cleaning — strip HTML and Liquid tags before sending to Groq.
 - 2026-05-06: Fixed policy dimension label casing in the Policy Audit UI and exports.
 - 2026-05-06: Fixed undefined truncate() function — replaced with cleanPolicy() helper.
+- 2026-05-06: Switched from single batched call to chunks of 5 products — single call caused identical scores due to 42k token context saturation.
+- 2026-05-06: Added 300ms delay between product batch calls to avoid rate limits.

@@ -123,6 +123,15 @@ async function callGroq(prompt: string) {
   return cleaned;
 }
 
+// Helper to chunk array into batches
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+}
+
 // Main analyzer: creates a simple batched product audit and policy audit/fallback
 export async function analyzeStore(
   store: StoreData,
@@ -141,7 +150,22 @@ export async function analyzeStore(
   let productAudits: ProductAudit[] = [];
 
   if (rawProducts.length > 0) {
-    const productPrompt = `Analyze the following products and return a JSON object named \"productAudits\" which is an array of audits matching this shape: { productId, productTitle, dimensions: { descriptionClarity, searchability, trustSignals, aiAnswerability, completeness }, gaps: [string], suggestedRewrite: string, priorityLevel: string, totalScore: number }.
+    // Split products into batches of 5 to avoid token saturation
+    const productBatches = chunkArray(rawProducts, 5);
+
+    try {
+      const clampProduct = (n: any) =>
+        Math.min(20, Math.max(0, Math.round(Number(n) || 0)));
+
+      // Process each batch
+      for (
+        let batchIndex = 0;
+        batchIndex < productBatches.length;
+        batchIndex++
+      ) {
+        const batch = productBatches[batchIndex];
+
+        const productPrompt = `Analyze the following products and return a JSON object named \"productAudits\" which is an array of audits matching this shape: { productId, productTitle, dimensions: { descriptionClarity, searchability, trustSignals, aiAnswerability, completeness }, gaps: [string], suggestedRewrite: string, priorityLevel: string, totalScore: number }.
 
 CRITICAL SCORING RULE: Scores and gaps must be consistent. If a gap mentions a dimension problem, that dimension MUST have a low score:
 - If description is missing or vague → descriptionClarity must be 0-5
@@ -156,62 +180,69 @@ Each dimension is 0-20. totalScore MUST equal the sum of all 5 dimensions. Total
 Return only valid JSON with a top-level object { \"productAudits\": [...] }.
 
 PRODUCTS:
-${JSON.stringify(rawProducts)}
+${JSON.stringify(batch)}
 `;
 
-    try {
-      const raw = await callGroq(productPrompt);
-      const parsed = JSON.parse(raw);
-      const audits = parsed?.productAudits ?? parsed?.audits ?? null;
-      if (!audits || !Array.isArray(audits))
-        throw new Error("Invalid product audits from Groq");
+        const raw = await callGroq(productPrompt);
+        const parsed = JSON.parse(raw);
+        const audits = parsed?.productAudits ?? parsed?.audits ?? null;
+        if (!audits || !Array.isArray(audits))
+          throw new Error(
+            `Invalid product audits from Groq for batch ${batchIndex}`,
+          );
 
-      const clampProduct = (n: any) =>
-        Math.min(20, Math.max(0, Math.round(Number(n) || 0)));
+        // Map and normalize each audit in this batch
+        const batchAudits = audits.map((a: any) => {
+          const dims = a.dimensions || {};
+          let d = {
+            descriptionClarity: clampProduct(dims.descriptionClarity),
+            searchability: clampProduct(dims.searchability),
+            trustSignals: clampProduct(dims.trustSignals),
+            aiAnswerability: clampProduct(dims.aiAnswerability),
+            completeness: clampProduct(dims.completeness),
+          };
 
-      productAudits = audits.map((a: any) => {
-        const dims = a.dimensions || {};
-        let d = {
-          descriptionClarity: clampProduct(dims.descriptionClarity),
-          searchability: clampProduct(dims.searchability),
-          trustSignals: clampProduct(dims.trustSignals),
-          aiAnswerability: clampProduct(dims.aiAnswerability),
-          completeness: clampProduct(dims.completeness),
-        };
+          // Detect scale and normalize to 0-20
+          const maxDimValue = Math.max(...Object.values(d));
+          if (maxDimValue <= 10) {
+            // Groq used 0-10 scale, multiply by 2 to get 0-20
+            (Object.keys(d) as Array<keyof typeof d>).forEach((key) => {
+              d[key] = Math.min(20, d[key] * 2);
+            });
+          } else if (maxDimValue > 20) {
+            // Groq used 0-100 scale, divide by 5 to get 0-20
+            (Object.keys(d) as Array<keyof typeof d>).forEach((key) => {
+              d[key] = Math.round(d[key] / 5);
+            });
+          }
 
-        // Detect scale and normalize to 0-20
-        const maxDimValue = Math.max(...Object.values(d));
-        if (maxDimValue <= 10) {
-          // Groq used 0-10 scale, multiply by 2 to get 0-20
-          (Object.keys(d) as Array<keyof typeof d>).forEach((key) => {
-            d[key] = Math.min(20, d[key] * 2);
-          });
-        } else if (maxDimValue > 20) {
-          // Groq used 0-100 scale, divide by 5 to get 0-20
-          (Object.keys(d) as Array<keyof typeof d>).forEach((key) => {
-            d[key] = Math.round(d[key] / 5);
-          });
+          const totalScore = Object.values(d).reduce((s, v) => s + v, 0);
+          const priority: ProductAudit["priorityLevel"] =
+            totalScore < 40
+              ? "critical"
+              : totalScore < 70
+                ? "needs-work"
+                : "good";
+          return {
+            productId: a.productId || a.id || "",
+            productTitle: a.productTitle || a.title || "",
+            dimensions: d,
+            gaps: Array.isArray(a.gaps) ? a.gaps : [],
+            suggestedRewrite: a.suggestedRewrite || "",
+            priorityLevel: priority,
+            totalScore,
+          } as ProductAudit;
+        });
+
+        productAudits.push(...batchAudits);
+
+        // Add 300ms delay between batch calls (except after last batch)
+        if (batchIndex < productBatches.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 300));
         }
-
-        const totalScore = Object.values(d).reduce((s, v) => s + v, 0);
-        const priority: ProductAudit["priorityLevel"] =
-          totalScore < 40
-            ? "critical"
-            : totalScore < 70
-              ? "needs-work"
-              : "good";
-        return {
-          productId: a.productId || a.id || "",
-          productTitle: a.productTitle || a.title || "",
-          dimensions: d,
-          gaps: Array.isArray(a.gaps) ? a.gaps : [],
-          suggestedRewrite: a.suggestedRewrite || "",
-          priorityLevel: priority,
-          totalScore,
-        } as ProductAudit;
-      });
+      }
     } catch (err) {
-      // fallback heuristics
+      // fallback heuristics: process all products locally
       productAudits = (store.products || []).map((p) => {
         const title = p.title || "Untitled Product";
         const descriptionLength = (p.descriptionHtml || "").length;
