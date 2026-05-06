@@ -352,8 +352,15 @@ export default function HomePage() {
       markdown += `## Policy Audit\n`;
       markdown += `Score: ${auditReport.policyAudit.totalScore}/100\n\n`;
       markdown += `### Dimensions\n`;
+      const displayNameMap: Record<string, string> = {
+        returnPolicyClarity: "Return Policy Clarity",
+        shippingInformation: "Shipping Information",
+        faqCoverage: "FAQ Coverage",
+        trustCredibility: "Trust & Credibility",
+      };
       Object.entries(auditReport.policyAudit.dimensions).forEach(([k, v]) => {
-        markdown += `- ${k}: ${v}/25\n`;
+        const label = displayNameMap[k] || k;
+        markdown += `- ${label}: ${v}/25\n`;
       });
       if (auditReport.policyAudit.gaps.length > 0) {
         markdown += `\n### Gaps\n`;

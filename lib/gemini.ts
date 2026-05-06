@@ -78,6 +78,18 @@ function stripHtml(input: string | null | undefined) {
     .trim();
 }
 
+// Clean policy text for LLM: strip HTML, Liquid tags, collapse whitespace, limit length
+function cleanPolicy(body: string | null | undefined) {
+  if (!body) return "[NOT CONFIGURED]";
+  return String(body)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\{\{[^}]*\}\}/g, "")
+    .replace(/\{%[^%]*%\}/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 800);
+}
+
 async function callGroq(prompt: string) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
@@ -268,25 +280,19 @@ ${JSON.stringify(rawProducts)}
   if (allPoliciesMissing) {
     policyAudit = policyFallback();
   } else {
-    // Build prompt using the actual policy bodies (strip HTML, trim)
-    const refundText =
-      stripHtml(
-        (policiesObj.refundPolicy && policiesObj.refundPolicy.body) || null,
-      ) || "[NOT CONFIGURED]";
-    const shippingText =
-      stripHtml(
-        (policiesObj.shippingPolicy && policiesObj.shippingPolicy.body) || null,
-      ) || "[NOT CONFIGURED]";
-    const privacyText =
-      stripHtml(
-        (policiesObj.privacyPolicy && policiesObj.privacyPolicy.body) || null,
-      ) || "[NOT CONFIGURED]";
-    const termsText =
-      stripHtml(
-        (policiesObj.termsOfService && policiesObj.termsOfService.body) || null,
-      ) || "[NOT CONFIGURED]";
-
-    const truncate = (s: string) => (s.length > 1500 ? s.slice(0, 1500) : s);
+    // Build prompt using cleaned policy bodies to avoid HTML/Liquid/token issues
+    const refundText = cleanPolicy(
+      policiesObj.refundPolicy && policiesObj.refundPolicy.body,
+    );
+    const shippingText = cleanPolicy(
+      policiesObj.shippingPolicy && policiesObj.shippingPolicy.body,
+    );
+    const privacyText = cleanPolicy(
+      policiesObj.privacyPolicy && policiesObj.privacyPolicy.body,
+    );
+    const termsText = cleanPolicy(
+      policiesObj.termsOfService && policiesObj.termsOfService.body,
+    );
 
     const prompt = `You are analyzing a Shopify store's policies. For each field below, provide a JSON object named "policyAudit" with the following shape: {"dimensions": {"returnPolicyClarity": number, "shippingInformation": number, "faqCoverage": number, "trustCredibility": number}, "gaps": [string], "recommendations": [string] }.
 Score each dimension from 0 to 25 (maximum 25 each, total maximum 100). Do not exceed 25 for any dimension.
@@ -339,11 +345,27 @@ ${truncate(termsText)}
         0,
       );
     } catch (err) {
-      // If Groq fails, fallback to a neutral empty audit but keep gaps indicating failure
+      // Defensive fallback: return structured fallback but list real missing policy gaps
       policyAudit = policyFallback();
-      policyAudit.gaps.unshift(
-        "Policy analysis failed: unable to parse LLM response",
-      );
+
+      const missing: string[] = [];
+      if (!policiesObj.refundPolicy || !policiesObj.refundPolicy.body)
+        missing.push("No refund policy configured");
+      if (!policiesObj.shippingPolicy || !policiesObj.shippingPolicy.body)
+        missing.push("No shipping policy configured");
+      if (!policiesObj.privacyPolicy || !policiesObj.privacyPolicy.body)
+        missing.push("No privacy policy configured");
+      if (!policiesObj.termsOfService || !policiesObj.termsOfService.body)
+        missing.push("No terms of service configured");
+
+      if (missing.length > 0) {
+        policyAudit.gaps = missing;
+      } else {
+        // All policies present but LLM failed — note analysis failure
+        policyAudit.gaps.unshift(
+          "Policy analysis failed: LLM call failed or returned invalid JSON",
+        );
+      }
     }
   }
 
