@@ -865,17 +865,6 @@ export default function HomePage() {
                           }
 
                           setAuditReport(payload.report);
-                          console.log("Store analysis report", payload.report);
-                          console.log(
-                            "RAW dimensions:",
-                            JSON.stringify(
-                              payload.report.productAudits[0]?.dimensions,
-                            ),
-                          );
-                          console.log(
-                            "RAW totalScore:",
-                            payload.report.productAudits[0]?.totalScore,
-                          );
                           const validCount =
                             payload.report.productAudits?.filter(
                               (p: ProductAudit) => p.totalScore > 0,

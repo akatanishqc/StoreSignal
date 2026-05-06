@@ -333,7 +333,6 @@ export async function fetchStoreData(
 
       if (policiesRes.ok) {
         const policiesData = await policiesRes.json();
-        console.log("policiesData.policies:", policiesData?.policies);
         const policiesArr: Array<{
           title?: string;
           body?: string;
