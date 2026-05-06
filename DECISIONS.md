@@ -1,0 +1,125 @@
+# StoreSignal — Decision Log
+
+> A running log of key decisions made during the build, the reasoning behind each, and tradeoffs considered.
+> Built for Kasparro Agentic Commerce Hackathon, Track 5.
+
+---
+
+## Architecture Decisions
+
+### AI Provider: Groq (Llama 3.3 70B Versatile)
+
+**Decision:** Use Groq API instead of Gemini or OpenAI
+
+**Reasoning:** Free tier with 14,400 req/day, reliable uptime, OpenAI-compatible format, fast inference for structured JSON analysis
+
+**Tradeoff:** Less brand recognition than GPT-4, but performance is sufficient for structured JSON analysis at scale
+
+---
+
+### Single Batched AI Call vs Per-Product Calls
+
+**Decision:** Send all products in one Groq call
+
+**Reasoning:** 17 separate calls exhausted free tier quota instantly. Single call = 2 total API calls per analysis run (products + policies)
+
+**Tradeoff:** Slightly less granular error recovery per product, but dramatically more reliable and cost-effective
+
+---
+
+### Shopify Auth: API Key Input vs OAuth
+
+**Decision:** Admin API key input in UI
+
+**Reasoning:** Full OAuth requires Shopify app review and a public app listing — outside hackathon scope. This approach signals "developer tool" not "consumer app"
+
+**Tradeoff:** Less seamless UX than one-click install, but correct for a diagnostic tool at this stage
+
+**Production path:** OAuth via Shopify App Store for production deployment
+
+---
+
+### Policy Data: REST API vs GraphQL
+
+**Decision:** Use REST `/policies.json` endpoint
+
+**Reasoning:** Shopify GraphQL Admin API does not expose shop policies — discovered after multiple failed attempts. REST endpoint required
+
+**Tradeoff:** Mixed REST + GraphQL in one codebase, but necessary given Shopify's API design
+
+---
+
+### Synthetic Data: Not Used
+
+**Decision:** Use real Shopify Admin API with development store
+
+**Reasoning:** Judges are commerce infrastructure engineers. Real API integration signals builder credibility over mock data
+
+**Tradeoff:** More setup complexity for the demo, but authenticity is critical for a hackathon submission
+
+---
+
+## Scope Decisions (What We Did NOT Build)
+
+### No User Accounts / Auth Persistence
+
+Credentials entered per session. Account persistence and multi-user support is unnecessary complexity for a diagnostic tool at this stage.
+
+### No Image Analysis
+
+Product images not sent to AI. Text and metadata analysis covers the core value proposition. Image analysis would require vision models and significantly increase operational cost.
+
+### No Real-time Monitoring
+
+Point-in-time audit only. Continuous monitoring and alerts are natural V2 features but outside hackathon scope.
+
+### No Multi-store Comparison
+
+Single store analysis keeps the product focused and feasible. Multi-store benchmarking is a natural enterprise feature for later.
+
+---
+
+## Technical Decisions
+
+### Next.js 14 App Router
+
+Familiar stack (used on prior projects), good for full-stack in one repo, straightforward deployment on Render + Firebase.
+
+### Dynamic Dimension Scale Normalization
+
+**Problem:** Groq returns inconsistent dimension scores — sometimes 0-10, sometimes 0-20, sometimes 0-100 depending on prompt interpretation
+
+**Solution:** Added dynamic detection after JSON parse. Max dimension value ≤10 → multiply by 2. Max >20 → divide by 5. Else keep as-is. Always normalize to 0-20 range.
+
+**Result:** Consistent UI rendering and score interpretation across all Groq response variations
+
+### ESLint Pinned to v8
+
+Next.js 14 has a peer dependency conflict with ESLint 9. Pinned to `^8.57.0` in package.json to resolve and stabilize the build.
+
+---
+
+## What Worked Well
+
+- **Groq API:** Reliable, fast, free tier sufficient for this workload
+- **Single batched call:** Dramatically reduced API quota pressure
+- **Tailwind CSS:** Rapid UI development with custom CSS variables for theming
+- **TypeScript + App Router:** Type safety and file-based routing kept code organized
+
+---
+
+## Known Limitations & Future Work
+
+1. **Dimension scale detection:** Works well for typical responses but could be more robust with explicit Groq schema validation
+2. **Policy HTML parsing:** Simple regex strip — could use a proper HTML parser for edge cases
+3. **Error messaging:** Could be more granular (e.g., specific Shopify API errors back to user)
+4. **Performance:** All products analyzed in one pass — could add pagination for stores with 500+ products
+
+---
+
+## Submission Artifacts
+
+- **GitHub:** https://github.com/akatanishqc/StoreSignal
+- **Live Demo:** [Add link]
+- **Product Doc:** `/docs/PRODUCT.md`
+- **Technical Doc:** `/docs/TECHNICAL.md`
