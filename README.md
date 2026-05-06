@@ -4,6 +4,10 @@
 
 Built by [Tanishq Choudhury](https://www.tanishqsolves.me/)
 
+## Live Demo
+
+🔗 https://storesignal.onrender.com
+
 ---
 
 ## What It Does
@@ -94,7 +98,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - [x] Demo video (link below)
 - [x] README with setup instructions
 - [x] Contribution note (solo project)
-- [x] Decision log (see `WORKLOG.md`)
+- [x] Decision log (see `DECISIONS.md`)
 
 ---
 
