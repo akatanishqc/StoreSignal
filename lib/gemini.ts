@@ -301,10 +301,14 @@ ${JSON.stringify(batch)}
 
   // Policy audit: if no policies present, return explicit fallback
   const policiesObj = store.policies || {};
-  const policyValues = Object.values(policiesObj).filter(Boolean) as Array<any>;
+  // Check if any policy has non-empty body content. Policies from shopify.ts
+  // are objects like { title: string | null, body: string | null } so checking
+  // object key counts is insufficient — we need to verify body content.
   const allPoliciesMissing =
-    policyValues.length === 0 ||
-    policyValues.every((p) => !p || Object.keys(p).length === 0);
+    !policiesObj.refundPolicy?.body &&
+    !policiesObj.shippingPolicy?.body &&
+    !policiesObj.privacyPolicy?.body &&
+    !policiesObj.termsOfService?.body;
 
   let policyAudit: PolicyAudit;
 
@@ -376,6 +380,8 @@ ${termsText}
         0,
       );
     } catch (err) {
+      // Log the Groq error for debugging and return structured fallback
+      console.error("Groq call failed:", err);
       // Defensive fallback: return structured fallback but list real missing policy gaps
       policyAudit = policyFallback();
 
