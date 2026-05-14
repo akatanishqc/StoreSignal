@@ -5,6 +5,53 @@
 
 ---
 
+## Recent Bug Fixes (2026-05-06)
+
+### Fixed Missing ShopifyProduct Import
+
+**Problem:** TypeScript error "Cannot find name 'ShopifyProduct'" in gemini.ts when using `ShopifyProduct` type in `generateHeuristicAudit()` function.
+
+**Fix:** Updated import statement to include `ShopifyProduct` type:
+
+```typescript
+import type { StoreData, ShopifyProduct } from "./shopify";
+```
+
+---
+
+### Batch-Level Error Handling in Product Analysis
+
+**Problem:** One failed Groq API call caused ALL products to fall back to hardcoded heuristics, masking the actual failure and producing identical scores across all analysis runs.
+
+**Fix:** Moved try/catch inside the batch processing loop so failed batches fall back individually. Only products in a failed batch now use heuristics; other batches continue with AI analysis.
+
+**Impact:** Improved error resilience and real-time diagnostics visibility per batch.
+
+---
+
+### Detailed Error Logging for Batch Failures
+
+**Decision:** Log batch-level errors to console with batch index and error message
+
+**Reasoning:** Enables operators to identify which batch failed and why, improving debugging without exposing raw errors to the user
+
+**Implementation:** `console.error('Batch ${batchIndex} product analysis failed:', err.message)`
+
+---
+
+### Summary and TopPriorities Now Use Real Data
+
+**Problem:** Summary was generic (`"Generated 5 product audits..."`), and topPriorities picked first 3 products regardless of priority level.
+
+**Fix:**
+
+- Summary now includes overall score, breakdown by priority level (critical vs needs-work), and policy audit status
+- TopPriorities now sorts by critical first, then needs-work, with actual gap descriptions
+
+**Example:** `"Store AI readiness: 62/100. 15 products analyzed: 3 critical, 7 need work. Policy audit complete."`
+
+---
+
 ## Architecture Decisions
 
 ### AI Provider: Groq (Llama 3.3 70B Versatile)

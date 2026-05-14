@@ -1,4 +1,4 @@
-import { StoreData } from "./shopify";
+import type { StoreData, ShopifyProduct } from "./shopify";
 
 // Top-level TypeScript interfaces
 export interface ProductAudit {
@@ -153,18 +153,63 @@ export async function analyzeStore(
     // Split products into batches of 5 to avoid token saturation
     const productBatches = chunkArray(rawProducts, 5);
 
-    try {
-      const clampProduct = (n: any) =>
-        Math.min(20, Math.max(0, Math.round(Number(n) || 0)));
+    const clampProduct = (n: any) =>
+      Math.min(20, Math.max(0, Math.round(Number(n) || 0)));
 
-      // Process each batch
-      for (
-        let batchIndex = 0;
-        batchIndex < productBatches.length;
-        batchIndex++
-      ) {
-        const batch = productBatches[batchIndex];
+    // Helper to generate heuristic audit for a product
+    const generateHeuristicAudit = (p: ShopifyProduct): ProductAudit => {
+      const title = p.title || "Untitled Product";
+      const descriptionLength = (p.descriptionHtml || "").length;
+      const hasImages = (p.images || []).length > 0;
 
+      const descriptionClarity = Math.min(
+        20,
+        descriptionLength > 300 ? 18 : descriptionLength > 100 ? 12 : 4,
+      );
+      const searchability = Math.min(20, title.length > 0 ? 10 : 2);
+      const trustSignals = Math.min(20, hasImages ? 10 : 2);
+      const aiAnswerability = Math.min(20, descriptionLength > 0 ? 10 : 2);
+      const completeness = Math.min(
+        20,
+        Math.round((descriptionClarity + trustSignals + aiAnswerability) / 3),
+      );
+      const totalScore =
+        descriptionClarity +
+        searchability +
+        trustSignals +
+        aiAnswerability +
+        completeness;
+      const gaps: string[] = [];
+      if (descriptionClarity < 10)
+        gaps.push("Improve product description clarity and detail.");
+      if (trustSignals < 8)
+        gaps.push("Add high-quality images and trust badges.");
+      if (searchability < 8)
+        gaps.push("Improve product title and metadata for search.");
+      const priorityLevel: ProductAudit["priorityLevel"] =
+        totalScore < 40 ? "critical" : totalScore < 70 ? "needs-work" : "good";
+      return {
+        productId: p.id || "",
+        productTitle: title,
+        totalScore,
+        dimensions: {
+          descriptionClarity,
+          searchability,
+          trustSignals,
+          aiAnswerability,
+          completeness,
+        },
+        gaps,
+        suggestedRewrite: "",
+        priorityLevel,
+      };
+    };
+
+    // Process each batch with individual error handling
+    for (let batchIndex = 0; batchIndex < productBatches.length; batchIndex++) {
+      const batch = productBatches[batchIndex];
+
+      try {
         const productPrompt = `Analyze the following products and return a JSON object named \"productAudits\" which is an array of audits matching this shape: { productId, productTitle, dimensions: { descriptionClarity, searchability, trustSignals, aiAnswerability, completeness }, gaps: [string], suggestedRewrite: string, priorityLevel: string, totalScore: number }.
 
 CRITICAL SCORING RULE: Scores and gaps must be consistent. If a gap mentions a dimension problem, that dimension MUST have a low score:
@@ -235,65 +280,23 @@ ${JSON.stringify(batch)}
         });
 
         productAudits.push(...batchAudits);
-
-        // Add 300ms delay between batch calls (except after last batch)
-        if (batchIndex < productBatches.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 300));
-        }
+      } catch (batchErr) {
+        console.error(
+          `Batch ${batchIndex} product analysis failed:`,
+          batchErr instanceof Error ? batchErr.message : String(batchErr),
+        );
+        // For failed batch, use heuristics for just those products in this batch
+        const batchProductIds = batch.map((p) => p.id);
+        const fallbackBatch = (store.products || [])
+          .filter((p) => batchProductIds.includes(p.id))
+          .map((p) => generateHeuristicAudit(p));
+        productAudits.push(...fallbackBatch);
       }
-    } catch (err) {
-      // fallback heuristics: process all products locally
-      productAudits = (store.products || []).map((p) => {
-        const title = p.title || "Untitled Product";
-        const descriptionLength = (p.descriptionHtml || "").length;
-        const hasImages = (p.images || []).length > 0;
 
-        const descriptionClarity = Math.min(
-          20,
-          descriptionLength > 300 ? 18 : descriptionLength > 100 ? 12 : 4,
-        );
-        const searchability = Math.min(20, title.length > 0 ? 10 : 2);
-        const trustSignals = Math.min(20, hasImages ? 10 : 2);
-        const aiAnswerability = Math.min(20, descriptionLength > 0 ? 10 : 2);
-        const completeness = Math.min(
-          20,
-          Math.round((descriptionClarity + trustSignals + aiAnswerability) / 3),
-        );
-        const totalScore =
-          descriptionClarity +
-          searchability +
-          trustSignals +
-          aiAnswerability +
-          completeness;
-        const gaps: string[] = [];
-        if (descriptionClarity < 10)
-          gaps.push("Improve product description clarity and detail.");
-        if (trustSignals < 8)
-          gaps.push("Add high-quality images and trust badges.");
-        if (searchability < 8)
-          gaps.push("Improve product title and metadata for search.");
-        const priorityLevel: ProductAudit["priorityLevel"] =
-          totalScore < 40
-            ? "critical"
-            : totalScore < 70
-              ? "needs-work"
-              : "good";
-        return {
-          productId: p.id || "",
-          productTitle: title,
-          totalScore,
-          dimensions: {
-            descriptionClarity,
-            searchability,
-            trustSignals,
-            aiAnswerability,
-            completeness,
-          },
-          gaps,
-          suggestedRewrite: "",
-          priorityLevel,
-        };
-      });
+      // Add 300ms delay between batch calls (except after last batch)
+      if (batchIndex < productBatches.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
     }
   } else {
     productAudits = [];
@@ -413,6 +416,33 @@ ${termsText}
       )
     : policyAudit.totalScore;
 
+  // Build topPriorities from worst-scoring products with actual gaps
+  const criticalProducts = productAudits
+    .filter((p) => p.priorityLevel === "critical")
+    .sort((a, b) => a.totalScore - b.totalScore);
+  const needsWorkProducts = productAudits.filter(
+    (p) => p.priorityLevel === "needs-work",
+  );
+
+  const topPriorities: string[] = [];
+  if (criticalProducts.length > 0) {
+    topPriorities.push(
+      ...criticalProducts
+        .slice(0, 3)
+        .map(
+          (p) =>
+            `${p.productTitle}: ${p.gaps[0] || "Critical priority - needs review"}`,
+        ),
+    );
+  }
+  if (topPriorities.length < 5 && needsWorkProducts.length > 0) {
+    topPriorities.push(
+      ...needsWorkProducts
+        .slice(0, 5 - topPriorities.length)
+        .map((p) => `${p.productTitle}: ${p.gaps[0] || "Needs work"}`),
+    );
+  }
+
   const report: StoreAuditReport = {
     storeName: store.shop?.name || store.shop?.primaryDomain?.url || "Store",
     overallScore: clamp(overallScore),
@@ -426,12 +456,8 @@ ${termsText}
             : "Not Ready",
     productAudits,
     policyAudit: policyAudit || null,
-    topPriorities: productAudits
-      .slice(0, 3)
-      .map(
-        (p) => `${p.productTitle} — ${p.gaps[0] || "Improve product content"}`,
-      ),
-    summary: `Generated ${productAudits.length} product audits, policy audit ${allPoliciesMissing ? "fallback" : "present"}.`,
+    topPriorities,
+    summary: `Store AI readiness: ${clamp(overallScore)}/100. ${productAudits.length} products analyzed: ${criticalProducts.length} critical, ${needsWorkProducts.length} need work. Policy audit ${allPoliciesMissing ? "incomplete (missing policies)" : "complete"}.`,
   };
 
   return report;
