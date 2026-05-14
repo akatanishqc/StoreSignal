@@ -332,7 +332,7 @@ export default function HomePage() {
     if (!auditReport) return;
 
     const now = new Date().toLocaleDateString();
-    let markdown = `# StoreSignal Audit G�� ${auditReport.storeName}\n`;
+    let markdown = `# StoreSignal Audit — ${auditReport.storeName}\n`;
     markdown += `Generated: ${now}\n`;
     markdown += `Score: ${auditReport.overallScore}/100 | ${auditReport.aiReadinessLevel}\n\n`;
 
@@ -491,7 +491,7 @@ export default function HomePage() {
                   }}
                 >
                   <h3 className="font-display text-lg font-semibold">
-                    G�� Top Priorities
+                    ⚠ Top Priorities
                   </h3>
                   <ol className="space-y-2 text-sm">
                     {auditReport.topPriorities.map((p, idx) => (
@@ -527,9 +527,9 @@ export default function HomePage() {
                         color: "#FFD700",
                       }}
                     >
-                      G�� No policies are configured for this store. AI shopping
+                      ⚠ No policies are configured for this store. AI shopping
                       agents cannot answer questions about returns, shipping, or
-                      store policies G�� this significantly reduces buyer trust.
+                      store policies — this significantly reduces buyer trust.
                     </div>
                   )}
                 {Object.entries(auditReport.policyAudit.dimensions).map(
@@ -597,7 +597,7 @@ export default function HomePage() {
                   <ul className="space-y-1 text-sm">
                     {auditReport.policyAudit.recommendations.map((rec, idx) => (
                       <li key={idx} className="text-[var(--text-secondary)]">
-                        G�� {rec}
+                        • {rec}
                       </li>
                     ))}
                   </ul>
@@ -687,7 +687,7 @@ export default function HomePage() {
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--text-secondary)] sm:text-lg">
               StoreSignal analyzes your Shopify store the way an AI shopping
-              agent does G�� surfacing gaps, misrepresentations, and missed
+              agent does — surfacing gaps, misrepresentations, and missed
               opportunities.
             </p>
 
@@ -710,10 +710,11 @@ export default function HomePage() {
               </div>
               <div className="terminal-panel rounded-2xl p-4">
                 <p className="font-mono-ui text-[0.72rem] uppercase tracking-[0.24em] text-[var(--text-mono)]">
-                  Zero Budget
+                  ZERO LATENCY
                 </p>
                 <p className="mt-2 text-base text-[var(--text-primary)]">
-                  Built for hackathon speed on free-tier infrastructure
+                  Real-time analysis powered by free-tier infrastructure with
+                  production-grade reliability
                 </p>
               </div>
             </div>
@@ -821,7 +822,7 @@ export default function HomePage() {
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="font-display text-xl font-semibold text-[var(--text-primary)]">
-                      G�� Connected G�� {result.shop.name}
+                      ✓ Connected — {result.shop.name}
                     </p>
                     <p className="font-mono-ui text-xs uppercase tracking-[0.18em] text-[var(--text-mono)]">
                       Store snapshot ready
@@ -860,23 +861,12 @@ export default function HomePage() {
                         }
 
                         setAuditReport(payload.report);
-                        console.log("Store analysis report", payload.report);
-                        console.log(
-                          "RAW dimensions:",
-                          JSON.stringify(
-                            payload.report.productAudits[0]?.dimensions,
-                          ),
-                        );
-                        console.log(
-                          "RAW totalScore:",
-                          payload.report.productAudits[0]?.totalScore,
-                        );
                         const validCount =
                           payload.report.productAudits?.filter(
                             (p: ProductAudit) => p.totalScore > 0,
                           ).length ?? 0;
                         setAnalysisMessage(
-                          `Analysis complete G�� ${validCount} products scored`,
+                          `Analysis complete — ${validCount} products scored`,
                         );
                         setTimeout(() => setAnalysisMessage(""), 6000);
                       } catch (err) {
@@ -898,7 +888,7 @@ export default function HomePage() {
                         {analysisMessage}
                       </span>
                     ) : (
-                      "Run AI Analysis G��"
+                      "Run AI Analysis →"
                     )}
                   </button>
                 </div>
