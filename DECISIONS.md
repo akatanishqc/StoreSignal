@@ -195,6 +195,7 @@ Next.js 14 has a peer dependency conflict with ESLint 9. Pinned to `^8.57.0` in 
 
 ## Change Log
 
+- 2026-05-06: Fixed file content swap between page.tsx and gemini.ts during restore.
 - 2026-05-06: Fixed splash arc animation with correct stroke-dasharray lengths and smoother cubic-bezier timing.
 - 2026-05-06: Fixed allPoliciesMissing check — was checking object key count instead of body content.
 - 2026-05-06: Removed hackathon reference from landing page feature cards; replaced with "ZERO LATENCY" messaging.
