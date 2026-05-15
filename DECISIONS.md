@@ -195,6 +195,7 @@ Next.js 14 has a peer dependency conflict with ESLint 9. Pinned to `^8.57.0` in 
 
 ## Change Log
 
+- 2026-05-06: Improved typography - larger hero headline, gradient text on key elements, better line-height and letter-spacing throughout.
 - 2026-05-06: Fixed corrupted emoji characters in page.tsx.
 - 2026-05-06: Removed remaining debug console.logs.
 - 2026-05-06: Fixed file content swap between page.tsx and gemini.ts during restore.

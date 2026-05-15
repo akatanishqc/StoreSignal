@@ -411,6 +411,7 @@ export default function HomePage() {
     const sortedProducts = [...validProducts].sort(
       (a, b) => a.totalScore - b.totalScore,
     );
+    const hasStrongScore = auditReport.overallScore >= 70;
 
     return (
       <main className="relative min-h-screen overflow-hidden px-5 py-6 text-[var(--text-primary)] sm:px-8 lg:px-10 pb-32">
@@ -423,7 +424,7 @@ export default function HomePage() {
             <div className="flex items-center gap-3">
               <span className="pulse-dot h-2.5 w-2.5 rounded-full bg-[var(--accent-green)]" />
               <span className="font-display text-lg font-semibold">
-                StoreSignal
+                Store<span className="text-gradient-green">Signal</span>
               </span>
             </div>
             <button
@@ -435,7 +436,7 @@ export default function HomePage() {
           </header>
 
           <section className="space-y-4">
-            <h1 className="font-display text-5xl font-bold">
+            <h1 className="font-display text-6xl font-extrabold tracking-[-0.04em] sm:text-7xl">
               {auditReport.storeName}
             </h1>
             <div className="grid gap-6 lg:grid-cols-2">
@@ -447,9 +448,11 @@ export default function HomePage() {
                     </p>
                     <div className="font-mono-ui text-6xl font-bold mt-2">
                       <span
-                        className="text-8xl font-extrabold"
+                        className={`inline-block text-8xl font-extrabold ${hasStrongScore ? "text-gradient-green" : "text-[var(--text-primary)]"}`}
                         style={{
-                          textShadow: "0 10px 30px rgba(0,255,135,0.08)",
+                          filter: hasStrongScore
+                            ? "drop-shadow(0 0 20px rgba(0,255,135,0.3))"
+                            : "none",
                         }}
                       >
                         {auditReport.overallScore}
@@ -510,7 +513,7 @@ export default function HomePage() {
 
           {auditReport.policyAudit && (
             <section className="terminal-panel rounded-[1.4rem] p-4 sm:p-6 space-y-4">
-              <h2 className="font-display text-2xl font-bold border-l-2 border-[#00FF87] pl-3">
+              <h2 className="font-display text-3xl font-bold tracking-[-0.03em] border-l-2 border-[#00FF87] pl-3">
                 Policy Audit
               </h2>
               <div className="grid gap-3 md:grid-cols-2">
@@ -608,7 +611,7 @@ export default function HomePage() {
 
           {sortedProducts.length > 0 && (
             <section className="space-y-4">
-              <h2 className="font-display text-2xl font-bold border-l-2 border-[#00FF87] pl-3">
+              <h2 className="font-display text-3xl font-bold tracking-[-0.03em] border-l-2 border-[#00FF87] pl-3">
                 Product Audits ({sortedProducts.length})
               </h2>
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
@@ -682,10 +685,11 @@ export default function HomePage() {
 
         <section className="grid flex-1 items-center gap-10 py-10 lg:grid-cols-[1.08fr_0.92fr] lg:gap-14 lg:py-12">
           <div className="relative z-10 max-w-3xl animate-fade-up">
-            <h1 className="mt-6 max-w-3xl font-display text-5xl font-extrabold leading-[0.96] tracking-[-0.04em] text-[var(--text-primary)] sm:text-6xl lg:text-7xl">
-              How Does AI See Your Store?
+            <h1 className="mt-6 max-w-3xl font-display text-6xl font-extrabold leading-[0.94] tracking-[-0.05em] text-[var(--text-primary)] sm:text-7xl lg:text-8xl">
+              <span>How Does AI See </span>
+              <span className="text-gradient-green">Your Store?</span>
             </h1>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--text-secondary)] sm:text-lg">
+            <p className="mt-6 max-w-2xl text-lg leading-[1.8] text-[color:rgba(240,240,245,0.7)] sm:text-xl">
               StoreSignal analyzes your Shopify store the way an AI shopping
               agent does — surfacing gaps, misrepresentations, and missed
               opportunities.
@@ -693,26 +697,26 @@ export default function HomePage() {
 
             <div className="mt-10 grid max-w-2xl gap-4 text-sm text-[var(--text-secondary)] sm:grid-cols-3">
               <div className="terminal-panel rounded-2xl p-4">
-                <p className="font-mono-ui text-[0.72rem] uppercase tracking-[0.24em] text-[var(--text-mono)]">
+                <p className="font-mono-ui text-[0.65rem] uppercase tracking-[0.32em] text-[var(--text-mono)]">
                   Diagnostic Readiness
                 </p>
-                <p className="mt-2 text-base text-[var(--text-primary)]">
+                <p className="mt-2 text-sm leading-relaxed text-[color:rgba(240,240,245,0.9)]">
                   Shopify metadata, policies, and product signals
                 </p>
               </div>
               <div className="terminal-panel rounded-2xl p-4">
-                <p className="font-mono-ui text-[0.72rem] uppercase tracking-[0.24em] text-[var(--text-mono)]">
+                <p className="font-mono-ui text-[0.65rem] uppercase tracking-[0.32em] text-[var(--text-mono)]">
                   Signal Quality
                 </p>
-                <p className="mt-2 text-base text-[var(--text-primary)]">
+                <p className="mt-2 text-sm leading-relaxed text-[color:rgba(240,240,245,0.9)]">
                   Spot gaps before an AI assistant misreads the store
                 </p>
               </div>
               <div className="terminal-panel rounded-2xl p-4">
-                <p className="font-mono-ui text-[0.72rem] uppercase tracking-[0.24em] text-[var(--text-mono)]">
+                <p className="font-mono-ui text-[0.65rem] uppercase tracking-[0.32em] text-[var(--text-mono)]">
                   ZERO LATENCY
                 </p>
-                <p className="mt-2 text-base text-[var(--text-primary)]">
+                <p className="mt-2 text-sm leading-relaxed text-[color:rgba(240,240,245,0.9)]">
                   Real-time analysis powered by free-tier infrastructure with
                   production-grade reliability
                 </p>
@@ -727,10 +731,10 @@ export default function HomePage() {
             <div className="terminal-panel rounded-[1.75rem] border-[color:var(--accent-green-border)] p-5 shadow-glow sm:p-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="font-display text-2xl font-semibold tracking-[-0.03em] text-[var(--text-primary)] sm:text-[2rem]">
+                  <h2 className="font-display text-3xl font-semibold tracking-[-0.03em] text-[var(--text-primary)] sm:text-4xl">
                     Connect Your Store
                   </h2>
-                  <p className="mt-2 max-w-md text-sm leading-6 text-[var(--text-secondary)]">
+                  <p className="mt-2 max-w-md text-sm leading-6 text-[color:rgba(136,136,160,0.9)]">
                     Pull live store data through the Shopify Admin API, then
                     hand it off to your AI pipeline.
                   </p>
