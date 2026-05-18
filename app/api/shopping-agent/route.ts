@@ -13,16 +13,13 @@ export async function POST(request: NextRequest) {
     const result = await runShoppingAgent(messages);
 
     return NextResponse.json(result);
-  } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Unable to process shopping request.";
+  } catch (err) {
+    console.error("Shopping agent error:", err);
 
-    return NextResponse.json(
+    return Response.json(
       {
-        message,
-        requiresAction: true,
+        message: "Shopping assistant unavailable.",
+        error: err instanceof Error ? err.message : String(err),
       },
       { status: 500 },
     );

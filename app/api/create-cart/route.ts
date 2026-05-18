@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { AGENT_PROFILE_URL } from "@/lib/ucp";
 
 export const runtime = "nodejs";
 
@@ -93,8 +94,7 @@ export async function POST(request: NextRequest) {
             lines: [{ variantId, quantity }],
             meta: {
               "ucp-agent": {
-                profile:
-                  "https://storesignal.onrender.com/.well-known/ucp-agent-profile.json",
+                profile: AGENT_PROFILE_URL,
               },
             },
           },

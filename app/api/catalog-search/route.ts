@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { AGENT_PROFILE_URL, FALLBACK_STORES } from "@/lib/ucp";
 
 export const runtime = "nodejs";
 
@@ -169,10 +170,93 @@ function normalizeProducts(payload: unknown): CatalogProduct[] {
   return Array.from(unique.values()).slice(0, 12);
 }
 
+type StoreProductJson = {
+  products?: Array<{
+    id: number;
+    title: string;
+    body_html?: string;
+    vendor?: string;
+    handle?: string;
+    images?: Array<{ src?: string | null }>;
+    variants?: Array<{
+      id: number;
+      price?: string;
+      title?: string;
+    }>;
+  }>;
+};
+
+async function searchFallbackStores(query: string): Promise<CatalogProduct[]> {
+  const queryTokens = query
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((token) => token.length > 2);
+
+  const results: CatalogProduct[] = [];
+
+  for (const store of FALLBACK_STORES) {
+    try {
+      const response = await fetch(`${store}/products.json?limit=50`);
+      if (!response.ok) continue;
+
+      const payload = (await response.json()) as StoreProductJson;
+      const products = Array.isArray(payload.products) ? payload.products : [];
+
+      for (const product of products) {
+        const haystack = [product.title, product.vendor, product.body_html]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        const matches =
+          queryTokens.length === 0 ||
+          queryTokens.some((token) => haystack.includes(token));
+
+        if (!matches) continue;
+
+        const variant = product.variants?.[0];
+        const imageUrl = product.images?.[0]?.src ?? "";
+        const merchantUrl = store;
+
+        results.push({
+          id: String(product.id),
+          title: product.title,
+          description:
+            typeof product.body_html === "string"
+              ? product.body_html
+                  .replace(/<[^>]*>/g, " ")
+                  .replace(/\s+/g, " ")
+                  .trim()
+                  .slice(0, 280)
+              : "",
+          price: variant?.price ?? "0",
+          currency: "USD",
+          merchant: new URL(store).hostname.replace(/^www\./i, ""),
+          merchantUrl,
+          imageUrl,
+          checkoutUrl: `${store}/products/${product.handle ?? ""}`,
+          variantId: String(variant?.id ?? product.id),
+        });
+      }
+    } catch (error) {
+      console.warn("Fallback store search failed:", store, error);
+    }
+  }
+
+  const unique = new Map<string, CatalogProduct>();
+  for (const product of results) {
+    if (!unique.has(product.id)) unique.set(product.id, product);
+  }
+
+  return Array.from(unique.values()).slice(0, 9);
+}
+
 export async function POST(request: NextRequest) {
+  let query = "";
+
   try {
     const body = (await request.json()) as CatalogSearchBody;
-    const query = body.query?.trim() ?? "";
+    query = body.query?.trim() ?? "";
     const maxPrice = body.filters?.maxPrice;
     const currencyFilter = body.filters?.currency?.trim()?.toUpperCase();
 
@@ -208,8 +292,7 @@ export async function POST(request: NextRequest) {
             },
             meta: {
               "ucp-agent": {
-                profile:
-                  "https://storesignal.onrender.com/.well-known/ucp-agent-profile.json",
+                profile: AGENT_PROFILE_URL,
               },
             },
           },
@@ -249,9 +332,24 @@ export async function POST(request: NextRequest) {
         ? error.message
         : "Global Catalog is unavailable right now.";
 
+    console.warn("Global Catalog unavailable, using fallback stores:", error);
+
+    const fallbackProducts = await searchFallbackStores(query);
+
+    if (fallbackProducts.length > 0) {
+      return NextResponse.json({
+        success: true,
+        message:
+          "Global Catalog is currently in testing phase. Try again in a moment, or I can search specific stores for you.",
+        products: fallbackProducts,
+      });
+    }
+
     return NextResponse.json(
       {
         success: false,
+        message:
+          "Global Catalog is currently in testing phase. Try again in a moment, or I can search specific stores for you.",
         error: `Unable to search Shopify Global Catalog: ${message}`,
       },
       { status: 503 },

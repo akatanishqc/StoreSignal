@@ -101,12 +101,19 @@ async function callGroq(
         messages,
         tools: toolSet,
         tool_choice: "auto",
-        temperature: 0.2,
+        max_tokens: 2048,
+        temperature: 0.3,
       }),
     },
   );
 
   if (!response.ok) {
+    const responseBody = await response.text().catch(() => "");
+    console.error("Groq API failure:", {
+      status: response.status,
+      statusText: response.statusText,
+      body: responseBody,
+    });
     throw new Error(`Groq request failed with status ${response.status}`);
   }
 
@@ -218,6 +225,7 @@ export async function runShoppingAgent(
         const searchResponse = await fetchJson<{
           success: boolean;
           products?: CatalogProduct[];
+          message?: string;
           error?: string;
         }>(`${getAppOrigin()}/api/catalog-search`, {
           query: String(args.query ?? ""),
@@ -241,8 +249,18 @@ export async function runShoppingAgent(
           content: JSON.stringify({
             success: searchResponse.success,
             products,
+            message: searchResponse.message,
           }),
         });
+
+        if (searchResponse.message && !searchResponse.success) {
+          return {
+            message: searchResponse.message,
+            products:
+              products.length > 0 ? products.slice(0, 3) : latestProducts,
+            requiresAction: true,
+          };
+        }
         continue;
       }
 

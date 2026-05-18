@@ -78,6 +78,14 @@ import type { StoreData, ShopifyProduct } from "./shopify";
 
 **Implementation:** `search_products` calls the catalog API route; `add_to_cart` calls the cart creation route and returns a checkout URL
 
+### Buyer Mode Error Handling and Fallbacks
+
+**Decision:** Add explicit logging for shopping-agent failures and a fallback search path when Shopify Global Catalog is unavailable
+
+**Reasoning:** The chat should fail visibly and debug-ably in development instead of returning a generic unavailable message on every turn, and the catalog experience should still produce useful results when the primary MCP endpoint is unreachable
+
+**Implementation:** The shopping-agent route now logs full handler errors; Groq API failures log the response body; catalog and cart MCP calls use an environment-aware UCP agent profile URL; Global Catalog fallback queries public Shopify storefront product feeds and surfaces a user-facing testing-phase message
+
 ### AI Provider: Groq (Llama 3.3 70B Versatile)
 
 **Decision:** Use Groq API instead of Gemini or OpenAI
