@@ -1,0 +1,7 @@
+{
+  "name": "StoreSignal Shopping Agent",
+  "version": "1.0",
+  "description": "AI shopping agent that helps buyers discover and purchase products across Shopify stores",
+  "capabilities": ["catalog", "cart"],
+  "contact": "https://storesignal.onrender.com"
+}

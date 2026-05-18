@@ -54,6 +54,30 @@ import type { StoreData, ShopifyProduct } from "./shopify";
 
 ## Architecture Decisions
 
+### Buyer Mode: Agentic Shopping Concierge
+
+**Decision:** Add a buyer-facing shopping mode powered by Shopify Global Catalog MCP plus Groq tool calling
+
+**Reasoning:** Allows StoreSignal to move from store diagnostics into a conversational shopping assistant that can discover products across Shopify stores and hand off directly to cart creation
+
+**Implementation:** Search flow uses the Global Catalog MCP; cart handoff uses Storefront MCP `update_cart`; the agent loop orchestrates search → rank → confirm → cart → checkout
+
+### UCP Agent Profile Hosted Publicly
+
+**Decision:** Publish a UCP agent profile at `/.well-known/ucp-agent-profile.json`
+
+**Reasoning:** Gives Shopify’s catalog and storefront MCP endpoints a stable public agent identity and contact URL
+
+**Implementation:** Profile names StoreSignal Shopping Agent and advertises `catalog` and `cart` capabilities
+
+### Tool Calling for True Agentic Behavior
+
+**Decision:** Use Groq tool calling instead of a single prompt/response exchange
+
+**Reasoning:** Tool calling lets the assistant search products, ask for clarification, and create carts in a loop rather than pretending to know the answer up front
+
+**Implementation:** `search_products` calls the catalog API route; `add_to_cart` calls the cart creation route and returns a checkout URL
+
 ### AI Provider: Groq (Llama 3.3 70B Versatile)
 
 **Decision:** Use Groq API instead of Gemini or OpenAI

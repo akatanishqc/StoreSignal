@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { StoreAuditReport, ProductAudit } from "@/lib/gemini";
 import type { StoreData } from "@/lib/shopify";
+import ShoppingChat from "@/components/ShoppingChat";
 
 type FetchState = "idle" | "loading" | "success" | "error";
 
@@ -648,6 +649,7 @@ export default function HomePage() {
             </button>
           </div>
         </div>
+        <ShoppingChat />
       </main>
     );
   }
@@ -988,6 +990,8 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <ShoppingChat />
       </div>
     </main>
   );
