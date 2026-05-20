@@ -22,7 +22,7 @@ const tools = [
     function: {
       name: "search_products",
       description:
-        "Search for products across all Shopify stores matching the buyer's query",
+        "Search for products across all Shopify stores matching the buyer's query. IMPORTANT: maxPrice must always be a number, never a string. Extract only the numeric value from price mentions.",
       parameters: {
         type: "object",
         properties: {
@@ -32,7 +32,8 @@ const tools = [
           },
           maxPrice: {
             type: "number",
-            description: "Maximum price filter if mentioned by user",
+            description:
+              "Maximum price as a number only, no currency symbols. Example: 2000 not '2000' or '₹2000'",
           },
           currency: {
             type: "string",
@@ -219,7 +220,17 @@ export async function runShoppingAgent(
     });
 
     for (const toolCall of toolCalls) {
-      const args = stringifyToolArguments(toolCall.function.arguments);
+      const toolArgs = stringifyToolArguments(toolCall.function.arguments);
+
+      // Coerce maxPrice into a clean number before passing it downstream.
+      if (toolArgs.maxPrice !== undefined) {
+        toolArgs.maxPrice = Number(
+          String(toolArgs.maxPrice).replace(/[^0-9.]/g, ""),
+        );
+        if (Number.isNaN(toolArgs.maxPrice)) {
+          delete toolArgs.maxPrice;
+        }
+      }
 
       if (toolCall.function.name === "search_products") {
         const searchResponse = await fetchJson<{
@@ -228,16 +239,16 @@ export async function runShoppingAgent(
           message?: string;
           error?: string;
         }>(`${getAppOrigin()}/api/catalog-search`, {
-          query: String(args.query ?? ""),
+          query: String(toolArgs.query ?? ""),
           filters: {
             maxPrice:
-              typeof args.maxPrice === "number"
-                ? args.maxPrice
-                : Number.isFinite(Number(args.maxPrice))
-                  ? Number(args.maxPrice)
-                  : undefined,
+              typeof toolArgs.maxPrice === "number"
+                ? toolArgs.maxPrice
+                : undefined,
             currency:
-              typeof args.currency === "string" ? args.currency : undefined,
+              typeof toolArgs.currency === "string"
+                ? toolArgs.currency
+                : undefined,
           },
         });
 
@@ -266,8 +277,9 @@ export async function runShoppingAgent(
 
       if (toolCall.function.name === "add_to_cart") {
         const quantity =
-          typeof args.quantity === "number" && Number.isFinite(args.quantity)
-            ? args.quantity
+          typeof toolArgs.quantity === "number" &&
+          Number.isFinite(toolArgs.quantity)
+            ? toolArgs.quantity
             : 1;
 
         const cartResponse = await fetchJson<{
@@ -275,8 +287,8 @@ export async function runShoppingAgent(
           checkoutUrl?: string;
           error?: string;
         }>(`${getAppOrigin()}/api/create-cart`, {
-          variantId: String(args.variantId ?? ""),
-          storeUrl: String(args.storeUrl ?? ""),
+          variantId: String(toolArgs.variantId ?? ""),
+          storeUrl: String(toolArgs.storeUrl ?? ""),
           quantity,
         });
 

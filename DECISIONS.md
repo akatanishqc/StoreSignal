@@ -7,6 +7,14 @@
 
 ## Recent Bug Fixes (2026-05-06)
 
+### Fixed Groq Tool Call Validation
+
+**Problem:** Groq sometimes returned `maxPrice` as a string like `"2000"`, which caused tool schema validation to fail before the catalog search ran.
+
+**Fix:** Added a numeric-only instruction in the `search_products` tool description and coerced `maxPrice` to a clean number immediately after parsing tool arguments.
+
+**Impact:** The shopping agent now tolerates currency symbols or quoted numeric text from the LLM while still sending a valid number to the catalog API.
+
 ### Fixed Missing ShopifyProduct Import
 
 **Problem:** TypeScript error "Cannot find name 'ShopifyProduct'" in gemini.ts when using `ShopifyProduct` type in `generateHeuristicAudit()` function.
